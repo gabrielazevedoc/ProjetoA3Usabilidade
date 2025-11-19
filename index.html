@@ -32,7 +32,22 @@
         <li><a href="#footer">Contato</a></li>
       </ul>
     </nav>
-    <div class="search" role="button" aria-label="Buscar no site">Buscar</div>
+    <div class="auth-entry" aria-live="polite">
+      <div class="auth-buttons">
+        <button class="btn tertiary" type="button" data-open-auth="pessoa">
+          Sou Pessoa Física
+        </button>
+        <button class="btn tertiary" type="button" data-open-auth="empresa">
+          Sou Empresa
+        </button>
+      </div>
+      <div class="auth-status">
+        <span id="authGreeting">Acesse sua conta para ter mais recursos</span>
+        <button id="logoutBtn" class="btn secondary small" type="button" style="display: none;">
+          Sair
+        </button>
+      </div>
+    </div>
   </header>
 
   <section class="main" id="home">
@@ -150,15 +165,30 @@
             </div>
             <div class="form-group">
               <label for="email">E-mail *</label>
-              <input 
-                id="email" 
-                name="email" 
-                type="email" 
-                placeholder="Digite seu e-mail" 
-                required 
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Digite seu e-mail"
+                required
                 aria-required="true"
               />
               <span class="error-message" id="email-error"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group full-width">
+              <label for="senha">Senha *</label>
+              <input
+                id="senha"
+                name="senha"
+                type="password"
+                placeholder="Crie uma senha para acessar a plataforma"
+                required
+                aria-required="true"
+                minlength="6"
+              />
+              <span class="error-message" id="senha-error"></span>
             </div>
           </div>
         </div>
@@ -246,6 +276,112 @@
       <div id="formMsg" class="form-message" style="display: none;"></div>
     </div>
   </section>
+
+  <div id="authModal" class="modal" aria-hidden="true">
+    <div class="modal-overlay" data-close-auth></div>
+    <div class="modal-card" role="dialog" aria-labelledby="authModalTitle" aria-modal="true">
+      <button class="modal-close" type="button" data-close-auth aria-label="Fechar modal">&times;</button>
+      <h2 id="authModalTitle">Entrar - Pessoa Física</h2>
+      <div class="modal-tabs" role="tablist">
+        <button class="modal-tab active" type="button" data-auth-tab="login" role="tab" aria-selected="true">Entrar</button>
+        <button class="modal-tab" type="button" data-auth-tab="register" role="tab" aria-selected="false">Cadastrar</button>
+      </div>
+      <div id="authModalMsg" class="form-message" style="display: none;" aria-live="assertive"></div>
+      <div class="modal-body">
+        <form class="auth-form" data-user-type="pessoa" data-mode="register" autocomplete="off">
+          <div class="form-group">
+            <label for="pessoaNome">Nome *</label>
+            <input id="pessoaNome" name="nome" type="text" placeholder="Seu nome completo" required />
+          </div>
+          <div class="form-group">
+            <label for="pessoaTelefone">Telefone</label>
+            <input id="pessoaTelefone" name="telefone" type="tel" placeholder="(11) 90000-0000" />
+          </div>
+          <div class="form-group">
+            <label for="pessoaEmail">E-mail *</label>
+            <input id="pessoaEmail" name="email" type="email" placeholder="email@exemplo.com" required />
+          </div>
+          <div class="form-group">
+            <label for="pessoaSenha">Senha *</label>
+            <input id="pessoaSenha" name="senha" type="password" placeholder="Crie uma senha" required minlength="6" />
+          </div>
+          <div class="form-group">
+            <label for="pessoaResiduo">Tipo de resíduo</label>
+            <input id="pessoaResiduo" name="tipoResiduo" type="text" placeholder="Ex: Papel, eletrônico" />
+          </div>
+          <div class="form-group">
+            <label for="pessoaQuantidade">Quantidade (kg)</label>
+            <input id="pessoaQuantidade" name="quantidadeKg" type="number" min="0" step="0.1" placeholder="10" />
+          </div>
+          <div class="form-group full-width">
+            <label for="pessoaObservacoes">Observações</label>
+            <textarea id="pessoaObservacoes" name="observacoes" rows="3" placeholder="Informações adicionais"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="pessoaLatitude">Latitude</label>
+            <input id="pessoaLatitude" name="latitude" type="number" step="0.000001" placeholder="-23.5" />
+          </div>
+          <div class="form-group">
+            <label for="pessoaLongitude">Longitude</label>
+            <input id="pessoaLongitude" name="longitude" type="number" step="0.000001" placeholder="-46.6" />
+          </div>
+          <button class="btn primary full-width" type="submit">Cadastrar pessoa física</button>
+        </form>
+
+        <form class="auth-form" data-user-type="pessoa" data-mode="login" autocomplete="off">
+          <div class="form-group full-width">
+            <label for="pessoaLoginEmail">E-mail *</label>
+            <input id="pessoaLoginEmail" name="email" type="email" placeholder="email@exemplo.com" required />
+          </div>
+          <div class="form-group full-width">
+            <label for="pessoaLoginSenha">Senha *</label>
+            <input id="pessoaLoginSenha" name="senha" type="password" placeholder="Digite sua senha" required />
+          </div>
+          <button class="btn primary full-width" type="submit">Entrar como pessoa física</button>
+        </form>
+
+        <form class="auth-form" data-user-type="empresa" data-mode="register" autocomplete="off">
+          <div class="form-group">
+            <label for="empresaRazao">Razão social *</label>
+            <input id="empresaRazao" name="razaoSocial" type="text" placeholder="Nome da empresa" required />
+          </div>
+          <div class="form-group">
+            <label for="empresaContato">Nome do contato *</label>
+            <input id="empresaContato" name="nomeContato" type="text" placeholder="Responsável" required />
+          </div>
+          <div class="form-group">
+            <label for="empresaTelefone">Telefone *</label>
+            <input id="empresaTelefone" name="telefone" type="tel" placeholder="(11) 4000-0000" required />
+          </div>
+          <div class="form-group">
+            <label for="empresaEmail">E-mail *</label>
+            <input id="empresaEmail" name="email" type="email" placeholder="contato@empresa.com" required />
+          </div>
+          <div class="form-group">
+            <label for="empresaSenha">Senha *</label>
+            <input id="empresaSenha" name="senha" type="password" placeholder="Crie uma senha" required minlength="6" />
+          </div>
+          <div class="form-group">
+            <label for="empresaCnpj">CNPJ</label>
+            <input id="empresaCnpj" name="cnpj" type="text" placeholder="00.000.000/0000-00" />
+          </div>
+          <button class="btn primary full-width" type="submit">Cadastrar empresa</button>
+        </form>
+
+        <form class="auth-form" data-user-type="empresa" data-mode="login" autocomplete="off">
+          <div class="form-group full-width">
+            <label for="empresaLoginEmail">E-mail *</label>
+            <input id="empresaLoginEmail" name="email" type="email" placeholder="contato@empresa.com" required />
+          </div>
+          <div class="form-group full-width">
+            <label for="empresaLoginSenha">Senha *</label>
+            <input id="empresaLoginSenha" name="senha" type="password" placeholder="Digite sua senha" required />
+          </div>
+          <button class="btn primary full-width" type="submit">Entrar como empresa</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <section id="local" class="map-section" aria-labelledby="map-title">
     <h2 id="map-title">Localização de resíduos</h2>
