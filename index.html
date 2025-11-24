@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IRecycle - Portal de Sustentabilidade</title>
+  
+  <meta name="description" content="IRecycle - Portal de sustentabilidade conectando empresas, ONGs e cidadãos para reciclagem e reúso de resíduos">
+  <meta name="keywords" content="reciclagem, sustentabilidade, resíduos, meio ambiente, coleta seletiva">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  
+  <link rel="stylesheet" href="./styles/style.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Pular para conteúdo principal</a>
+
+  <header>
+    <div class="logo">
+      <img src="./assets/imagem-logo.png" alt="símbolo de reciclagem" />    
+      IRecycle
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#sobre">Sobre</a></li>
+        <li><a href="#cadastro">Cadastro</a></li>
+        <li><a href="#footer">Contato</a></li>
+      </ul>
+    </nav>
+    <div class="auth-entry" aria-live="polite">
+      <div class="auth-buttons">
+        <button class="btn tertiary" type="button" data-open-auth="pessoa">
+          Sou Pessoa Física
+        </button>
+        <button class="btn tertiary" type="button" data-open-auth="empresa">
+          Sou Empresa
+        </button>
+      </div>
+      <div class="auth-status">
+        <span id="authGreeting">Acesse sua conta para ter mais recursos</span>
+        <button id="logoutBtn" class="btn secondary small" type="button" style="display: none;">
+          Sair
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="main" id="home">
+    <div class="main-text">
+      <h1>IRecycle</h1>
+      <p>Somos um portal de sustentabilidade para empresas e pessoas que querem um mundo melhor.</p>
+      <div class="saiba-mais-row">
+        <button class="btn saibamais" onclick="scrollToSection('sobre')" tabindex="0">
+          Saiba mais
+        </button>
+        <button class="btn video" onclick="scrollToSection('video')" tabindex="0">
+          <span class="play-icon">▶</span>
+          Veja vídeo de apresentação
+        </button>
+      </div>
+    </div>
+
+    <div class="main-img">
+      <img 
+        src="./assets/imagem-header.png" 
+        alt="Pessoas colaborando com reciclagem e sustentabilidade"
+        loading="lazy"
+      >
+    </div>
+  </section>
+
+  <section class="stats-section" aria-labelledby="stats-title">
+    <h2 id="stats-title" class="sr-only">Nossos números</h2>
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="icon" aria-hidden="true">🏠</div>
+        <div class="number" id="empresas-count">100+</div>
+        <span class="label">Empresas cadastradas</span>
+      </div>
+      <div class="stat-card">
+        <div class="icon" aria-hidden="true">👥</div>
+        <div class="number" id="usuarios-count">800+</div>
+        <span class="label">Usuários ativos</span>
+      </div>
+      <div class="stat-card">
+        <div class="icon" aria-hidden="true">📍</div>
+        <div class="number" id="pontos-count">23+</div>
+        <span class="label">Pontos de coletas</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="sobre" class="about-section" aria-labelledby="about-title">
+    <div class="about-card">
+      <h2 id="about-title">Quem somos nós?</h2>
+      <p>
+        Somos um portal de sustentabilidade que conecta empresas, ONGs e cidadãos para facilitar o reúso, reciclagem e destinação correta de resíduos.
+        Nossa missão é tornar o processo simples e acessível.      
+      </p>
+    </div>
+  </section>
+
+  <section class="video-section" id="video" aria-labelledby="video-title">
+    <h2 id="video-title" class="sr-only">Vídeo de apresentação</h2>
+    <div class="video-wrapper">
+      <div class="video-embed">
+        <iframe 
+          src="https://www.youtube.com/embed/2Vv-BfVoq4g" 
+          title="Vídeo de apresentação da IRecycle"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <section id="cadastro" class="form-section" aria-labelledby="form-title">
+    <div class="form-container">
+      <h2 id="form-title">Cadastrar resíduo</h2>
+
+      <div class="steps" id="steps" role="tablist">
+        <div class="step active" data-step="1" role="tab" aria-selected="true">
+          1 • Contato
+        </div>
+        <div class="step" data-step="2" role="tab" aria-selected="false">
+          2 • Empresa
+        </div>
+        <div class="step" data-step="3" role="tab" aria-selected="false">
+          3 • Projeto
+        </div>
+      </div>
+
+      <form id="residueForm" autocomplete="off" novalidate>
+        <div id="step-1" class="step-content" role="tabpanel">
+          <div class="row">
+            <div class="form-group">
+              <label for="nome">Nome *</label>
+              <input 
+                id="nome" 
+                name="nome" 
+                type="text" 
+                placeholder="Como prefere ser chamado" 
+                required 
+                aria-required="true"
+              />
+              <span class="error-message" id="nome-error"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="telefone">Telefone</label>
+              <input 
+                id="telefone" 
+                name="telefone" 
+                type="tel" 
+                placeholder="Digite seu número de WhatsApp"
+                maxlength="15"
+              />
+            </div>
+            <div class="form-group">
+              <label for="email">E-mail *</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Digite seu e-mail"
+                required
+                aria-required="true"
+              />
+              <span class="error-message" id="email-error"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group full-width">
+              <label for="senha">Senha *</label>
+              <input
+                id="senha"
+                name="senha"
+                type="password"
+                placeholder="Crie uma senha para acessar a plataforma"
+                required
+                aria-required="true"
+                minlength="6"
+              />
+              <span class="error-message" id="senha-error"></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="step-2" class="step-content" role="tabpanel" style="display: none;">
+          <div class="row">
+            <div class="form-group">
+              <label for="empresa">Empresa</label>
+              <input 
+                id="empresa" 
+                name="empresa" 
+                type="text" 
+                placeholder="Nome da empresa (opcional)" 
+              />
+            </div>
+            <div class="form-group">
+              <label for="cargo">Cargo</label>
+              <input 
+                id="cargo" 
+                name="cargo" 
+                type="text" 
+                placeholder="Seu cargo" 
+              />
+            </div>
+          </div>
+        </div>
+
+        <div id="step-3" class="step-content" role="tabpanel" style="display: none;">
+          <div class="row">
+            <div class="form-group">
+              <label for="residuo">Tipo de resíduo</label>
+              <select id="residuo" name="residuo">
+                <option value="">Selecione um tipo</option>
+                <option value="plástico">Plástico</option>
+                <option value="metal">Metal</option>
+                <option value="papel">Papel</option>
+                <option value="vidro">Vidro</option>
+                <option value="orgânico">Orgânico</option>
+                <option value="eletrônico">Eletrônico</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="quantidade">Quantidade (kg)</label>
+              <input 
+                id="quantidade" 
+                name="quantidade" 
+                type="number" 
+                placeholder="Ex: 10" 
+                min="0"
+                step="0.1"
+              />
+              <span class="error-message" id="quantidade-error"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group full-width">
+              <label for="observacoes">Observações</label>
+              <textarea 
+                id="observacoes" 
+                name="observacoes" 
+                rows="3" 
+                placeholder="Informações adicionais sobre o resíduo"
+                maxlength="500"
+              ></textarea>
+              <div class="char-count" id="observacoes-count">0/500</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn secondary" id="prevBtn" style="display: none;">
+            Voltar
+          </button>
+          <button type="button" class="btn primary" id="nextBtn">
+            Próximo
+          </button>
+          <button type="submit" class="btn primary" id="submitBtn" style="display: none;">
+            <span class="btn-text">Cadastrar</span>
+            <span class="btn-loading" style="display: none;">Processando...</span>
+          </button>
+        </div>
+      </form>
+
+      <div id="formMsg" class="form-message" style="display: none;"></div>
+    </div>
+  </section>
+
+  <div id="authModal" class="modal" aria-hidden="true">
+    <div class="modal-overlay" data-close-auth></div>
+    <div class="modal-card" role="dialog" aria-labelledby="authModalTitle" aria-modal="true">
+      <button class="modal-close" type="button" data-close-auth aria-label="Fechar modal">&times;</button>
+      <h2 id="authModalTitle">Entrar - Pessoa Física</h2>
+      <div class="modal-tabs" role="tablist">
+        <button class="modal-tab active" type="button" data-auth-tab="login" role="tab" aria-selected="true">Entrar</button>
+        <button class="modal-tab" type="button" data-auth-tab="register" role="tab" aria-selected="false">Cadastrar</button>
+      </div>
+      <div id="authModalMsg" class="form-message" style="display: none;" aria-live="assertive"></div>
+      <div class="modal-body">
+        <form class="auth-form" data-user-type="pessoa" data-mode="register" autocomplete="off">
+          <div class="form-group">
+            <label for="pessoaNome">Nome *</label>
+            <input id="pessoaNome" name="nome" type="text" placeholder="Seu nome completo" required />
+          </div>
+          <div class="form-group">
+            <label for="pessoaTelefone">Telefone</label>
+            <input id="pessoaTelefone" name="telefone" type="tel" placeholder="(11) 90000-0000" />
+          </div>
+          <div class="form-group">
+            <label for="pessoaEmail">E-mail *</label>
+            <input id="pessoaEmail" name="email" type="email" placeholder="email@exemplo.com" required />
+          </div>
+          <div class="form-group">
+            <label for="pessoaSenha">Senha *</label>
+            <input id="pessoaSenha" name="senha" type="password" placeholder="Crie uma senha" required minlength="6" />
+          </div>
+          <div class="form-group">
+            <label for="pessoaResiduo">Tipo de resíduo</label>
+            <input id="pessoaResiduo" name="tipoResiduo" type="text" placeholder="Ex: Papel, eletrônico" />
+          </div>
+          <div class="form-group">
+            <label for="pessoaQuantidade">Quantidade (kg)</label>
+            <input id="pessoaQuantidade" name="quantidadeKg" type="number" min="0" step="0.1" placeholder="10" />
+          </div>
+          <div class="form-group full-width">
+            <label for="pessoaObservacoes">Observações</label>
+            <textarea id="pessoaObservacoes" name="observacoes" rows="3" placeholder="Informações adicionais"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="pessoaLatitude">Latitude</label>
+            <input id="pessoaLatitude" name="latitude" type="number" step="0.000001" placeholder="-23.5" />
+          </div>
+          <div class="form-group">
+            <label for="pessoaLongitude">Longitude</label>
+            <input id="pessoaLongitude" name="longitude" type="number" step="0.000001" placeholder="-46.6" />
+          </div>
+          <button class="btn primary full-width" type="submit">Cadastrar pessoa física</button>
+        </form>
+
+        <form class="auth-form" data-user-type="pessoa" data-mode="login" autocomplete="off">
+          <div class="form-group full-width">
+            <label for="pessoaLoginEmail">E-mail *</label>
+            <input id="pessoaLoginEmail" name="email" type="email" placeholder="email@exemplo.com" required />
+          </div>
+          <div class="form-group full-width">
+            <label for="pessoaLoginSenha">Senha *</label>
+            <input id="pessoaLoginSenha" name="senha" type="password" placeholder="Digite sua senha" required />
+          </div>
+          <button class="btn primary full-width" type="submit">Entrar como pessoa física</button>
+        </form>
+
+        <form class="auth-form" data-user-type="empresa" data-mode="register" autocomplete="off">
+          <div class="form-group">
+            <label for="empresaRazao">Razão social *</label>
+            <input id="empresaRazao" name="razaoSocial" type="text" placeholder="Nome da empresa" required />
+          </div>
+          <div class="form-group">
+            <label for="empresaContato">Nome do contato *</label>
+            <input id="empresaContato" name="nomeContato" type="text" placeholder="Responsável" required />
+          </div>
+          <div class="form-group">
+            <label for="empresaTelefone">Telefone *</label>
+            <input id="empresaTelefone" name="telefone" type="tel" placeholder="(11) 4000-0000" required />
+          </div>
+          <div class="form-group">
+            <label for="empresaEmail">E-mail *</label>
+            <input id="empresaEmail" name="email" type="email" placeholder="contato@empresa.com" required />
+          </div>
+          <div class="form-group">
+            <label for="empresaSenha">Senha *</label>
+            <input id="empresaSenha" name="senha" type="password" placeholder="Crie uma senha" required minlength="6" />
+          </div>
+          <div class="form-group">
+            <label for="empresaCnpj">CNPJ</label>
+            <input id="empresaCnpj" name="cnpj" type="text" placeholder="00.000.000/0000-00" />
+          </div>
+          <button class="btn primary full-width" type="submit">Cadastrar empresa</button>
+        </form>
+
+        <form class="auth-form" data-user-type="empresa" data-mode="login" autocomplete="off">
+          <div class="form-group full-width">
+            <label for="empresaLoginEmail">E-mail *</label>
+            <input id="empresaLoginEmail" name="email" type="email" placeholder="contato@empresa.com" required />
+          </div>
+          <div class="form-group full-width">
+            <label for="empresaLoginSenha">Senha *</label>
+            <input id="empresaLoginSenha" name="senha" type="password" placeholder="Digite sua senha" required />
+          </div>
+          <button class="btn primary full-width" type="submit">Entrar como empresa</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <section id="local" class="map-section" aria-labelledby="map-title">
+    <h2 id="map-title">Localização de resíduos</h2>
+    <p>Pontos de coleta e parceiros próximos — movimente o mapa ou clique nos marcadores.</p>
+
+    <div id="map" aria-label="Mapa interativo com pontos de coleta de resíduos"></div>
+    
+    <div class="map-legend">
+      <div class="legend-item">
+        <span class="legend-color coleta"></span>
+        Pontos de Coleta
+      </div>
+      <div class="legend-item">
+        <span class="legend-color ong"></span>
+        ONGs Parceiras
+      </div>
+      <div class="legend-item">
+        <span class="legend-color empresa"></span>
+        Empresas
+      </div>
+    </div>
+  </section>
+
+  <footer id="footer">
+    <div class="footer-content">
+      <div class="logo">IRecycle</div>
+      <div class="footer-info">
+        <p>&copy; 2024 IRecycle. Todos os direitos reservados.</p>
+        <p>Promovendo um futuro mais sustentável.</p>
+      </div>
+      <div class="socials">
+        <a href="#" aria-label="Facebook" target="_blank" rel="noopener">
+          <img src="./assets/facebook-icon.png" alt="Facebook">
+        </a>
+        <a href="#" aria-label="Instagram" target="_blank" rel="noopener">
+          <img src="./assets/instagram-icon.png" alt="Instagram">
+        </a>
+        <a href="#" aria-label="WhatsApp" target="_blank" rel="noopener">
+          <img src="./assets/whatsapp-icon.png" alt="WhatsApp">
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="./js/main.js"></script>
+</body>
+</html>
