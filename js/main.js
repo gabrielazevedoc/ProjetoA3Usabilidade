@@ -9,7 +9,7 @@ class IRecycleApp {
   constructor() {
     this.currentStep = 1;
     this.totalSteps = 3;
-    this.apiBaseUrl = 'http://localhost:3000/api';
+    this.apiBaseUrl = 'http://localhost:5000/api';
     this.mapMarkers = [];
     this.contactCache = new Map();
     this.session = this.getStoredSession();
@@ -24,6 +24,7 @@ class IRecycleApp {
     this.initializeEventListeners();
     this.initializeAuthUI();
     this.initializeMap();
+    this.initializeManagement();
     this.tryCaptureLocation();
     this.updateAuthStateUI();
     this.fetchStats();
@@ -367,12 +368,24 @@ class IRecycleApp {
       `;
     }
 
+    // Botões de edição/exclusão (aparecem apenas para empresas logadas)
+    let actionButtons = '';
+    if (this.currentUser && this.currentUser.tipo === 'empresa') {
+      actionButtons = `
+        <div class="popup-actions" style="margin-top: 12px; display: flex; gap: 8px;">
+          <button onclick="app.openEditModal(${registro.Id})" class="btn secondary small">Editar</button>
+          <button onclick="app.confirmDelete(${registro.Id})" class="btn secondary small" style="background-color: var(--error-red); border-color: var(--error-red);">Excluir</button>
+        </div>
+      `;
+    }
+
     return `
       <div class="map-popup">
         <h3>${nome}</h3>
         <p><strong>Resíduo:</strong> ${this.escapeHtml(tipoResiduo)}</p>
         <p><strong>Quantidade:</strong> ${this.escapeHtml(quantidade)}</p>
         ${contatoHtml}
+        ${actionButtons}
       </div>
     `;
   }
@@ -723,6 +736,12 @@ class IRecycleApp {
       this.logoutBtn.style.display = this.currentUser ? 'inline-flex' : 'none';
     }
 
+    // Mostrar/ocultar link de gerenciamento
+    const navGerenciar = document.getElementById('navGerenciar');
+    if (navGerenciar) {
+      navGerenciar.style.display = this.currentUser ? 'block' : 'none';
+    }
+
     this.loadResiduosFromAPI();
   }
 
@@ -742,8 +761,215 @@ class IRecycleApp {
       console.error('Erro ao carregar stats', e);
     }
   }
+
+  // Management Panel Functions
+  initializeManagement() {
+    this.manageSection = document.getElementById('gerenciar');
+    this.manageTable = document.getElementById('manageTableBody');
+    this.searchInput = document.getElementById('searchInput');
+    this.filterType = document.getElementById('filterType');
+    this.refreshBtn = document.getElementById('refreshBtn');
+    this.editModal = document.getElementById('editModal');
+    this.editForm = document.getElementById('editForm');
+    this.editModalMsg = document.getElementById('editModalMsg');
+    this.registros = [];
+
+    if (this.refreshBtn) {
+      this.refreshBtn.addEventListener('click', () => this.loadManageData());
+    }
+
+    if (this.searchInput) {
+      this.searchInput.addEventListener('input', () => this.filterManageData());
+    }
+
+    if (this.filterType) {
+      this.filterType.addEventListener('change', () => this.filterManageData());
+    }
+
+    if (this.editForm) {
+      this.editForm.addEventListener('submit', (e) => this.handleEditSubmit(e));
+    }
+
+    // Close edit modal handlers
+    document.querySelectorAll('[data-close-edit]').forEach(el => {
+      el.addEventListener('click', () => this.closeEditModal());
+    });
+
+    // Navegação para gerenciar
+    const navGerenciar = document.querySelector('a[href="#gerenciar"]');
+    if (navGerenciar) {
+      navGerenciar.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.showManageSection();
+      });
+    }
+  }
+
+  showManageSection() {
+    if (!this.currentUser) {
+      alert('Você precisa estar logado para acessar o painel de gerenciamento.');
+      return;
+    }
+
+    this.manageSection.style.display = 'block';
+    this.loadManageData();
+    this.manageSection.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async loadManageData() {
+    if (!this.manageTable) return;
+
+    this.manageTable.innerHTML = '<tr><td colspan="7" class="loading-row">Carregando registros...</td></tr>';
+
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/pessoas`, {
+        headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {}
+      });
+
+      if (!response.ok) throw new Error('Erro ao carregar registros');
+
+      const payload = await response.json();
+      this.registros = Array.isArray(payload) ? payload : payload.items || [];
+
+      this.renderManageData(this.registros);
+    } catch (error) {
+      console.error(error);
+      this.manageTable.innerHTML = '<tr><td colspan="7" class="loading-row">Erro ao carregar registros. Tente novamente.</td></tr>';
+    }
+  }
+
+  filterManageData() {
+    const searchTerm = this.searchInput?.value.toLowerCase() || '';
+    const typeFilter = this.filterType?.value || '';
+
+    const filtered = this.registros.filter(registro => {
+      const matchesSearch = 
+        (registro.Nome || '').toLowerCase().includes(searchTerm) ||
+        (registro.Email || '').toLowerCase().includes(searchTerm) ||
+        (registro.TipoResiduo || '').toLowerCase().includes(searchTerm);
+
+      const matchesType = !typeFilter || (registro.TipoResiduo || '').toLowerCase() === typeFilter.toLowerCase();
+
+      return matchesSearch && matchesType;
+    });
+
+    this.renderManageData(filtered);
+  }
+
+  renderManageData(data) {
+    if (!this.manageTable) return;
+
+    if (data.length === 0) {
+      this.manageTable.innerHTML = '<tr><td colspan="7" class="loading-row">Nenhum registro encontrado.</td></tr>';
+      return;
+    }
+
+    this.manageTable.innerHTML = data.map(registro => `
+      <tr>
+        <td>${registro.Id || '-'}</td>
+        <td>${this.escapeHtml(registro.Nome || '-')}</td>
+        <td>${this.escapeHtml(registro.Email || '-')}</td>
+        <td>${this.escapeHtml(registro.TipoResiduo || '-')}</td>
+        <td>${registro.QuantidadeKg || '-'}</td>
+        <td>${registro.CreatedAt ? new Date(registro.CreatedAt).toLocaleDateString('pt-BR') : '-'}</td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn-icon edit" onclick="app.openEditModal(${registro.Id})" title="Editar">✏️</button>
+            <button class="btn-icon delete" onclick="app.confirmDelete(${registro.Id})" title="Excluir">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  openEditModal(id) {
+    const registro = this.registros.find(r => r.Id === id);
+    if (!registro) return;
+
+    document.getElementById('editId').value = registro.Id;
+    document.getElementById('editNome').value = registro.Nome || '';
+    document.getElementById('editTelefone').value = registro.Telefone || '';
+    document.getElementById('editEmail').value = registro.Email || '';
+    document.getElementById('editTipoResiduo').value = registro.TipoResiduo || '';
+    document.getElementById('editQuantidade').value = registro.QuantidadeKg || '';
+    document.getElementById('editObservacoes').value = registro.Observacoes || '';
+
+    this.editModal.classList.add('open');
+    this.editModal.setAttribute('aria-hidden', 'false');
+  }
+
+  closeEditModal() {
+    this.editModal.classList.remove('open');
+    this.editModal.setAttribute('aria-hidden', 'true');
+    this.editForm.reset();
+    this.editModalMsg.style.display = 'none';
+  }
+
+  async handleEditSubmit(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const id = document.getElementById('editId').value;
+
+    const payload = {
+      nome: formData.get('nome'),
+      telefone: formData.get('telefone') || null,
+      email: formData.get('email'),
+      tipoResiduo: formData.get('tipoResiduo') || null,
+      quantidadeKg: formData.get('quantidadeKg') ? Number(formData.get('quantidadeKg')) : null,
+      observacoes: formData.get('observacoes') || null
+    };
+
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/pessoas/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.authToken && { Authorization: `Bearer ${this.authToken}` })
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error('Erro ao atualizar registro');
+
+      this.displayEditMessage('Registro atualizado com sucesso!', 'success');
+      setTimeout(() => {
+        this.closeEditModal();
+        this.loadManageData();
+        this.loadResiduosFromAPI();
+      }, 1000);
+    } catch (error) {
+      this.displayEditMessage(error.message || 'Erro ao atualizar', 'error');
+    }
+  }
+
+  async confirmDelete(id) {
+    if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/pessoas/${id}`, {
+        method: 'DELETE',
+        headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {}
+      });
+
+      if (!response.ok) throw new Error('Erro ao excluir registro');
+
+      alert('Registro excluído com sucesso!');
+      this.loadManageData();
+      this.loadResiduosFromAPI();
+    } catch (error) {
+      alert(error.message || 'Erro ao excluir');
+    }
+  }
+
+  displayEditMessage(message, type = 'info') {
+    if (this.editModalMsg) {
+      this.editModalMsg.textContent = message;
+      this.editModalMsg.className = `form-message ${type}`;
+      this.editModalMsg.style.display = message ? 'block' : 'none';
+    }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  new IRecycleApp();
+  window.app = new IRecycleApp();
 });
