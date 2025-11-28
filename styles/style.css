@@ -118,6 +118,55 @@ h2 {
   color: var(--green-text);
 }
 
+/* Carrossel de Reciclagem */
+#recyclingCarousel {
+  margin-top: 0;
+}
+
+#recyclingCarousel .carousel-item img {
+  height: 400px;
+  object-fit: cover;
+  filter: brightness(0.8);
+}
+
+#recyclingCarousel .carousel-caption {
+  background: rgba(46, 120, 2, 0.85);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(5px);
+}
+
+#recyclingCarousel .carousel-caption h5 {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-xs);
+  color: white;
+}
+
+#recyclingCarousel .carousel-caption p {
+  font-size: var(--font-size-lg);
+  margin-bottom: 0;
+  color: var(--green-light);
+}
+
+#recyclingCarousel .carousel-control-prev-icon,
+#recyclingCarousel .carousel-control-next-icon {
+  background-color: var(--green-dark);
+  border-radius: 50%;
+  padding: var(--spacing-md);
+}
+
+#recyclingCarousel .carousel-indicators button {
+  background-color: var(--green-medium);
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+}
+
+#recyclingCarousel .carousel-indicators button.active {
+  background-color: var(--green-dark);
+}
+
 .btn {
   padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: 999px;
@@ -302,7 +351,7 @@ nav a:hover::after {
 .main-text h1 {
   font-size: var(--font-size-5xl);
   line-height: 1;
-  color: var(--orange-accent);
+  color: white;
   margin-bottom: var(--spacing-lg);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
